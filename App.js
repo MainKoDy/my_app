@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, ScrollView, SectionList, SafeAreaView, StatusBar, TouchableOpacity} from 'react-native';
+import { Text, View, StyleSheet, ScrollView, SectionList, SafeAreaView, TouchableOpacity} from 'react-native';
+import {Picker} from '@react-native-picker/picker';
 
 export default function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('time'); // new state variable
+  const [selectedSortMethod, setSelectedSortMethod] = useState('');
 
   const url = 'https://api.weather.gov/alerts/active?area=CA';
 
@@ -19,7 +20,6 @@ export default function App() {
           title: alert.properties.headline,
           description: alert.properties.description,
           event: alert.properties.event,
-          isExpanded: false,
           area: alert.properties.areaDesc,
           onsetDate: alert.properties.onset,
           expireDate: alert.properties.expires,
@@ -32,15 +32,15 @@ export default function App() {
           urgency: alert.properties.urgency,
           sender: alert.properties.sender,
           senderName: alert.properties.senderName,
-        };
+          isExpanded: false,
+        }
       })))
-      .catch((error) => console.error(error))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((error) => console.error(error));
+  }, [])
 
   // sort data based on current sortBy state
   useEffect(() => {
-    switch (sortBy) {
+    switch (selectedSortMethod) {
       case 'type':
         setData([...data].sort((a, b) => a.event.localeCompare(b.event)));
         break;
@@ -54,14 +54,14 @@ export default function App() {
         // handle invalid sortBy value
         break;
     }
-  }, [sortBy]);
+  }, [selectedSortMethod])
 
   const sections = [
     {
       title: 'US Weather Service Alerts',
       data: data,
     },
-  ];
+  ]
 
   const handleExpand = (id) => {
     setData(data.map((item) => {
@@ -69,73 +69,76 @@ export default function App() {
         return {
           ...item,
           isExpanded: !item.isExpanded,
-        };
+        }
       } else {
-        return item;
+        return item
       }
-    }));
-  };
+    }))
+  }
 
   const handleSort = (sortMethod) => {
-    setSortBy(sortMethod);
-  };
+    setSelectedSortMethod(sortMethod)
+  }
 
   return (
-    <SafeAreaView style={styles.header}>
-      <View style={styles.sortContainer}>
-        <TouchableOpacity
-          style={[styles.sortButton, sortBy === 'type' && styles.activeSortButton]}
-          onPress={() => handleSort('type')}
-        >
-          <Text style={[styles.sortButtonText, sortBy === 'type' && styles.activeSortButtonText]}>Sort by Type</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.sortButton, sortBy === 'area' && styles.activeSortButton]}
-          onPress={() => handleSort('area')}
-        >
-          <Text style={[styles.sortButtonText, sortBy === 'area' && styles.activeSortButtonText]}>Sort by Area</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.sortButton, sortBy === 'severity' && styles.activeSortButton]}
-          onPress={() => handleSort('severity')}
-        >
-          <Text style={[styles.sortButtonText, sortBy === 'severity' && styles.activeSortButtonText]}>Sort by Severity</Text>
-        </TouchableOpacity>
+<SafeAreaView style={styles.header}>
+  <View style={styles.sortContainer}>
+  <Text style={{ color: '#aaa' }}> </Text>
+  <Text style={{ color: '#aaa' }}> </Text>
+    <Text style={{ color: 'black', fontWeight: 'bold', textAlign: 'center'}}>Sort By:</Text>
+    <Picker style={styles.picker}
+      selectedValue={selectedSortMethod}
+      onValueChange={(itemValue) => handleSort(itemValue)}
+      itemStyle={{ backgroundColor: '#322D2D' }}
+    >
+      <Picker.Item style={{color : 'black'}} label="Select a Value" value="" />
+      <Picker.Item style={{color : 'black'}} label="Type" value="type" />
+      <Picker.Item style={{color : 'black'}} label="Area" value="area" />
+      <Picker.Item style={{color : 'black'}} label="Severity" value="severity" />
+    </Picker>
+  </View>
+  <SectionList
+    sections={sections}
+    keyExtractor={(item) => item.id}
+    renderItem={({ item }) => (
+      <View key={item.id} style={styles.item}>
+        <Text style={{ color: '#aaa', fontWeight: 'bold', textAlign: 'center'}}>{item.severity}</Text>
+        <Text style={styles.title} onPress={() => handleExpand(item.id)}>{item.title}</Text>
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Effective Date: {item.effectiveDate}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Onset Date: {item.onsetDate}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Expiry Date: {item.expireDate}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>End Date: {item.ends}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Area: {item.area}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Status: {item.status}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Message Type: {item.messageType}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Category: {item.category}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Certainty: {item.certainty}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Urgency: {item.urgency}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Sender: {item.sender}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}>Sender Name: {item.senderName}</Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: 'white' }}>{item.description}</Text>}
+        <Text style={{ color: '#aaa' }}>{item.event}</Text>
       </View>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View key={item.id} style={styles.item}>
-            <Text style={{ color: '#aaa', fontWeight: 'bold', textAlign: 'Center'}}>{item.severity}</Text>
-            <Text style={styles.title} onPress={() => handleExpand(item.id)}>{item.title}</Text>
-            {item.isExpanded && <Text style={{ color: 'white' }}>Effective Date: {item.effectiveDate}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Onset Date: {item.onsetDate}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Expiry Date: {item.expireDate}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>End Date: {item.ends}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Area: {item.area}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Status: {item.status}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Message Type: {item.messageType}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Category: {item.category}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Certainty: {item.certainty}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Urgency: {item.urgency}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Sender: {item.sender}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>Sender Name: {item.senderName}</Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}> </Text>}
-            {item.isExpanded && <Text style={{ color: 'white' }}>{item.description}</Text>}
+    )}
+    renderSectionHeader={({ section }) => (
+      <Text style={styles.header}>{section.title}</Text>
+    )}
+  />
+</SafeAreaView>
 
-
-
-            <Text style={{ color: '#aaa' }}>{item.event}</Text> {/* display event type */}
-          </View>
-        )}
-        renderSectionHeader={({ section }) => (
-          <Text style={styles.header}>{section.title}</Text>
-        )}
-      />
-    </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -155,4 +158,8 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 8,
   },
-});
+  picker: {
+    backgroundColor: '#dfe1e1',
+
+  }
+})
