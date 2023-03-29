@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, ScrollView, SectionList, SafeAreaView, TouchableOpacity} from 'react-native';
+import { Text, View, StyleSheet, SectionList, SafeAreaView} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 
 export default function App() {
@@ -7,12 +7,12 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [selectedSortMethod, setSelectedSortMethod] = useState('');
 
-  const url = 'https://api.weather.gov/alerts/active?area=CA';
+  const url = 'https://api.weather.gov/alerts/active?area=CA'; // API URL
 
   useEffect(() => {
     fetch(url)
-      .then((resp) => resp.json())
-      .then((json) => setData(json.features.map((alert) => {
+      .then((resp) => resp.json()) // Convert recieved API into json format
+      .then((json) => setData(json.features.map((alert) => { // Create an array of objects, with given fields.
         return {
           id: alert.id,
           effectiveDate: alert.properties.effective,
@@ -35,10 +35,10 @@ export default function App() {
           isExpanded: false,
         }
       })))
-      .catch((error) => console.error(error));
+      .catch((error) => console.error(error)); // catch error
   }, [])
 
-  // sort data based on current sortBy state
+  // sort the data based on selection
   useEffect(() => {
     switch (selectedSortMethod) {
       case 'type':
@@ -51,7 +51,6 @@ export default function App() {
         setData([...data].sort((a, b) => a.severity.localeCompare(b.severity)));
         break;
       default:
-        // handle invalid sortBy value
         break;
     }
   }, [selectedSortMethod])
@@ -63,7 +62,7 @@ export default function App() {
     },
   ]
 
-  const handleExpand = (id) => {
+  const handleExpand = (id) => { // Expand selected item to display further details
     setData(data.map((item) => {
       if (item.id === id) {
         return {
@@ -76,7 +75,7 @@ export default function App() {
     }))
   }
 
-  const handleSort = (sortMethod) => {
+  const handleSort = (sortMethod) => { // Function to call "setSelectedSortMethod", selecting the sorting method.
     setSelectedSortMethod(sortMethod)
   }
 
@@ -100,10 +99,11 @@ export default function App() {
   <SectionList
     sections={sections}
     keyExtractor={(item) => item.id}
-    renderItem={({ item }) => (
+    renderItem={({ item }) => ( // DIsplay data
       <View key={item.id} style={styles.item}>
-        <Text style={{ color: '#aaa', fontWeight: 'bold', textAlign: 'center'}}>{item.severity}</Text>
+        <Text style={styles.severity}>{item.severity}</Text>
         <Text style={styles.title} onPress={() => handleExpand(item.id)}>{item.title}</Text>
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
         {item.isExpanded && <Text style={{ color: '#aaa' }}>Effective Date: {item.effectiveDate}</Text>}
         {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
         {item.isExpanded && <Text style={{ color: '#aaa' }}>Onset Date: {item.onsetDate}</Text>}
@@ -128,6 +128,7 @@ export default function App() {
         {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
         {item.isExpanded && <Text style={{ color: '#aaa' }}>Sender Name: {item.senderName}</Text>}
         {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
+        {item.isExpanded && <Text style={{ color: '#aaa' }}> </Text>}
         {item.isExpanded && <Text style={{ color: 'white' }}>{item.description}</Text>}
         <Text style={{ color: '#aaa' }}>{item.event}</Text>
       </View>
@@ -141,7 +142,7 @@ export default function App() {
   )
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ // style sheet
   header: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -160,6 +161,10 @@ const styles = StyleSheet.create({
   },
   picker: {
     backgroundColor: '#dfe1e1',
-
+  },
+  severity: {
+    color: '#aaa', 
+    fontWeight: 'bold', 
+    textAlign: 'center',
   }
 })
